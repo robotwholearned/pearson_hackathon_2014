@@ -43,19 +43,15 @@
 
             camera.position.z = 5;
 
-            function rotateCube(){
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
-            }
-            function rotateColoredCube(){
-                coloredCube.rotation.x += 0.01;
-                coloredCube.rotation.y += 0.01;
+            function rotateShape(shape){
+                shape.rotation.x += 0.01;
+                shape.rotation.y += 0.01;
             }
             function render() {
                 // /This will create a loop that causes the renderer to draw the scene 60 times per second
                 requestAnimationFrame(render);
-                rotateCube();
-                rotateColoredCube();
+                rotateShape(cube);
+                rotateShape(coloredCube);
                 renderer.render(scene, camera);
             }
             render()
