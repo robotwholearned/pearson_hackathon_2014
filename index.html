@@ -1,65 +1,30 @@
-<!doctype html> 
-<html> 
-<head>
-	<script src="js/headtrackr.js"></script>  
-	<script src="js/three.min.js"></script>
-</head> 
-<body> 
-	<script>
+<html>
+    <head>
+        <title>My first Three.js app</title>
+        <style>canvas { width: 100%; height: 100% }</style>
+    </head>
+    <body>
+        <script src="js/three.min.js"></script>
+        <script>
+            //need a camera, a scene, and a renderer
+            var scene = new THREE.Scene();
+            //args:     1. field of view - extent of the observable world that is seen at any given moment
+            //          2. aspect ratio - You almost always want to use the width of the element divided by the height, or you'll get the same result as when you play old movies on a widescreen TV - the image looks squished.
+            //          3. near clipping plane
+            //          4. far clipping plane
+            //          -objects further away from the camera than the value of far or closer than near won't be rendered.
+            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-    var scene, camera, renderer;
-    var geometry, material, mesh;
-
-    init();
-    animate();
-
-    function init() {
-
-        scene = new THREE.Scene();
-
-        camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
-        camera.position.z = 1000;
-
-        geometry = new THREE.BoxGeometry( 200, 200, 200 );
-        material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
-
-        mesh = new THREE.Mesh( geometry, material );
-        scene.add( mesh );
-
-        renderer = new THREE.CanvasRenderer();
-        renderer.setSize( window.innerWidth, window.innerHeight );
-
-        document.body.appendChild( renderer.domElement );
-
-    }
-
-    function animate() {
-
-        requestAnimationFrame( animate );
-
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y += 0.02;
-
-        renderer.render( scene, camera );
-
-    }
-
-</script>
-
-	<canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
-	<video id="inputVideo" autoplay loop></video>
-	<script type="text/javascript">
-		var videoInput = document.getElementById('inputVideo');
-		var canvasInput = document.getElementById('inputCanvas');
-
-		var htracker = new headtrackr.Tracker();
-		htracker.init(videoInput, canvasInput);
-		htracker.start();
-	</script>
-
-
-	<footer> 
-
-	</footer> 
-</body> 
-</html> 
+            //renderer: 
+            //In addition to the WebGLRenderer we used here, Three.js comes with a few others, often used as fallbacks for users with older browsers or for those who don't have WebGL support for some reason
+            var renderer = new THREE.WebGLRenderer();
+            //need to set the size at which we want it to render our app
+            //for performance setSize(window.innerWidth/2 and window.innerHeight/2), for half the resolution
+            //does not mean that the game will only fill half the window, but rather look a bit blurry and scaled up
+            renderer.setSize( window.innerWidth, window.innerHeight );
+            
+            //<canvas> element the renderer uses to display the scene to us.
+            document.body.appendChild( renderer.domElement );
+        </script>
+    </body>
+</html>
