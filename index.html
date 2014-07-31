@@ -52,6 +52,7 @@
             function render() {
                 // /This will create a loop that causes the renderer to draw the scene 60 times per second
                 //!!!!! pauses when the user navigates to another browser tab
+                //Basically, anything you want to move or change while the game / app is running has to go through the render loop
                 requestAnimationFrame(render);
                 
                 cube.rotation.x += 0.01;
