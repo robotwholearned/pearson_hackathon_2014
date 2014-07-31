@@ -1,7 +1,15 @@
 <html>
     <head>
         <title>My first Three.js app</title>
-        <style>canvas { width: 100%; height: 100% }</style>
+        <style>
+            canvas { 
+                width: 100%; 
+                height: 100%; 
+                margin-left: auto; 
+                margin-right: auto; 
+                display: block;
+            }
+        </style>
     </head>
     <body>
         <script src="js/three.min.js"></script>
@@ -21,8 +29,10 @@
             //need to set the size at which we want it to render our app
             //for performance setSize(window.innerWidth/2 and window.innerHeight/2), for half the resolution
             //does not mean that the game will only fill half the window, but rather look a bit blurry and scaled up
-            renderer.setSize( window.innerWidth, window.innerHeight );
-            
+            //@90% so that it doesn't do weird scroll bar thing
+            renderer.setSize( window.innerWidth*0.9, window.innerHeight*0.9);
+            //console.log("innerWidth:" + window.innerWidth);
+            //console.log("innerHeight:" + window.innerHeight);
             //<canvas> element the renderer uses to display the scene to us.
             document.body.appendChild( renderer.domElement );
         </script>
