@@ -1,14 +1,19 @@
 <html>
 <head>
 <title>Pearson Hackathon 2014</title>
-  
-</head>
-<body>
   <script src="js/three.min.js"></script>
   <script src="js/headtrackr.js"></script>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+  
+
   <canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
   <video id="inputVideo" autoplay loop></video>
   <canvas id="debug" width="320" height="240"></canvas>
+  
+  <div id="character"></div>
+
   <script type="text/javascript"> 
     //need a camera, a scene, and a renderer 
     var scene = new THREE.Scene();
@@ -20,15 +25,15 @@
 
     //add multi cube 
     var geometryColored = new THREE.BoxGeometry(1, 1, 1);
-    var i;
-    for (i = 0; i < geometryColored.faces.length; i++) {
-        geometryColored.faces[i].color.setHex(Math.random() * 0xffffff);
-        console.log(geometryColored.faces[i].color);
+    for (var index = 0; index < geometryColored.faces.length; index++) {
+        geometryColored.faces[index].color.setHex(Math.random() * 0xffffff);
+        console.log(geometryColored.faces[index].color);
     }
     var materialColored = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: THREE.FaceColors });
     var coloredCube = new THREE.Mesh(geometryColored, materialColored);
     coloredCube.position.set(-1.5, 0.0, 0.0);
     scene.add(coloredCube);
+
     var videoInput = document.getElementById('inputVideo');
     var canvasInput = document.getElementById('inputCanvas');
     var debugOverlay = document.getElementById('debug');
