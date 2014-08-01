@@ -1,32 +1,26 @@
 <html>
 <head>
-<title>Pearson Hackathon 2014</title>
+  <title>Pearson Hackathon 2014</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
   <script src="js/three.min.js"></script>
   <script src="js/headtrackr.js"></script>
-  <link rel="stylesheet" type="text/css" href="styles.css">
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
   <canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
   <video id="inputVideo" autoplay loop></video>
-  <canvas id="debug" width="320" height="240"></canvas>
-  
+  <canvas id="overlay" width="320" height="240"></canvas>
   <div id="character" class=""></div>
   <div id="paths"></div>
-  <script type="text/javascript"> 
 
-    var videoInput = document.getElementById('inputVideo');
-    var canvasInput = document.getElementById('inputCanvas');
-    var htracker = new headtrackr.Tracker({calcAngles : true });
-    htracker.init(videoInput, canvasInput);
-    htracker.start();
-  </script> 
   <script type="text/javascript">
     //Global variables that will be accessed in the functions below.
     var currentKey;           //records the current key pressed
     var TimerWalk;            //timer handle
     var charStep = 2;         //1=1st foot, 2=stand, 3=2nd foot, 4=stand
-    var charSpeed = 400;      //how fast the character will move
+    var charSpeed = 1000;      //how fast the character will move
+    var maxHeight = window.innerHeight - 64;
+    var maxWidth = window.innnerWidth - 64;
 
     //KeyDown Function
     //if there is no currentKey down, execute charWalk
@@ -52,21 +46,27 @@
         //set the currentKey to false, this will enable a new key to be pressed 
         currentKey = false; 
         //clear the walk timer 
-        clearInterval(TimerWalk); 
+        // clearInterval(TimerWalk); 
         //finish the character's movement 
         $('#character').stop(true, true); 
       }
     });
 
+    function characterReset(){
+      // clearInterval(TimerWalk); 
+      $('#character').stop(true, true); 
+      //center character
+      $('#character').removeAttr('class');
+      $('#character').addClass(characterReset);  
+      //clear path or transparent them!!!!
+      document.getElementsByClassName("path-pebbles").fadeTo( "slow", 0.33);
+    }
+
     //Character Walk Function 
     function charWalk(dir) {
-      //adjust from lang to code 
       if (dir == 'up') dir = 'back'; 
       if (dir == 'down') dir = 'front'; 
-      //move the character 
-      processWalk(dir); 
-      //set the interval timer to continually move the character 
-      TimerWalk = setInterval(function() { processWalk(dir); }, charSpeed); 
+      processWalk(dir);
     }
 
     //Process Character Walk Function
@@ -91,6 +91,7 @@
 
       //move the char 
       //we will only want to move the character 32px (which is 1 unit) in any direction 
+      console.log("before:" + $('#character').position().top + ", " + $('#character').position().left);
       switch(dir) {
         case'front': 
           $('#character').animate({top: '+=32'}, charSpeed); 
@@ -100,18 +101,119 @@
           if ($('#character').position().top > 0) {
             $('#character').animate({top: '-=32'}, charSpeed); 
           } 
+          
           break; 
         case'left': 
           //don't let the character move any further left if they are already at the left side of the screen 
           if ($('#character').position().left > 0) {
             $('#character').animate({left: '-=32'}, charSpeed); 
           } 
+          
           break; 
         case'right': 
           $('#character').animate({left: '+=32'}, charSpeed); 
-          break; 
+          
+          break;
+      }
+      //pull back from the brink 
+      console.log("after:" + $('#character').position().top + ", " + $('#character').position().left);
+      if($('#character').position().left >= maxWidth){
+        $('#character').animate({left: '-=100'}, charSpeed); 
+      } 
+      if($('#character').position().top >= maxHeight){
+        $('#character').animate({top: '-=100'}, charSpeed); 
       }
     }
   </script>
+
+
+
+  <script type="text/javascript"> 
+  //globals to track face path
+  var lastFaceX = 0;
+  var lastFaceY = 0;
+  var currentFaceX = 0;
+  var currentFaceY = 0;
+  var onceEverySixtyFrames = 0;
+
+    var videoInput = document.getElementById('inputVideo');
+    var canvasInput = document.getElementById('inputCanvas');
+    var canvasOverlay = document.getElementById('overlay');
+
+    var overlayContext = canvasOverlay.getContext('2d');
+      canvasOverlay.style.position = "absolute";
+      canvasOverlay.style.top = '0px';
+      canvasOverlay.style.zIndex = '100001';
+      canvasOverlay.style.display = 'block';
+
+    var htracker = new headtrackr.Tracker({calcAngles : true });
+    htracker.init(videoInput, canvasInput);
+    htracker.start();
+    document.addEventListener("facetrackingEvent", function( event ) {
+        // clear canvas
+        overlayContext.clearRect(0,0,320,240);
+
+        // once we have stable tracking, draw rectangle
+        if (event.detection == "CS") {
+          currentFaceY = event.y;
+          currentFaceX = event.x;
+          
+          //pretty square around face
+          // overlayContext.translate(event.x, event.y)
+          // overlayContext.rotate(event.angle-(Math.PI/2));
+          // overlayContext.strokeStyle = "#AFEEEE";
+          // overlayContext.strokeRect((-(event.width/2)) >> 0, (-(event.height/2)) >> 0, event.width, event.height);
+          // overlayContext.rotate((Math.PI/2)-event.angle);
+          // overlayContext.translate(-event.x, -event.y);
+          
+          if (onceEverySixtyFrames >= 0)
+          {
+            //console.log("last xy: (" + lastFaceX + ", " + lastFaceY + ")");
+            //console.log("curr xy: (" + currentFaceX + ", " + currentFaceY + ")");
+
+            onceEverySixtyFrames = 0;
+            //move character based on last + current facePosition 
+            if (currentFaceY > lastFaceY) {charWalk('up'); }
+            else if((currentFaceY < lastFaceY)){charWalk('down'); }
+
+            if (currentFaceX > lastFaceX) {charWalk('left'); }
+            else if(currentFaceX < lastFaceX){charWalk('right'); }
+          }
+          $('#character').stop(true, true);
+          lastFaceX = event.x;
+          lastFaceY = event.y;
+          onceEverySixtyFrames ++;
+        }
+      });
+    var drawIdent = function(cContext,x,y) {
+      // normalise values 
+      x = (x/320)*canvasInput.width; 
+      y = (y/240)*canvasInput.height; 
+      // flip horizontally 
+      x = canvasInput.width - x; 
+      // clean canvas 
+      cContext.clearRect(0,0,canvasInput.width,canvasInput.height);
+      
+      // draw rectangle around canvas 
+      //cContext.strokeRect(0,0,canvasInput.width,canvasInput.height); 
+      // draw marker, from x,y position 
+      cContext.beginPath(); 
+      cContext.moveTo(x-5,y); 
+      cContext.lineTo(x+5,y); 
+      cContext.closePath(); 
+      cContext.stroke(); 
+      
+      cContext.beginPath(); 
+      cContext.moveTo(x,y-5); 
+      cContext.lineTo(x,y+5); 
+      cContext.closePath(); 
+      cContext.stroke(); 
+    };
+    document.addEventListener("facetrackingEvent", function(e) {
+      drawIdent(overlayContext, e.x, e.y); 
+    }, false);
+  
+  </script> 
+  
 </body> 
 </html>
