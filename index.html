@@ -4,15 +4,14 @@
   <script src="js/three.min.js"></script>
   <script src="js/headtrackr.js"></script>
   <link rel="stylesheet" type="text/css" href="styles.css">
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
-  
-
   <canvas id="inputCanvas" width="320" height="240" style="display:none"></canvas>
   <video id="inputVideo" autoplay loop></video>
   <canvas id="debug" width="320" height="240"></canvas>
   
-  <div id="character"></div>
+  <div id="character" class=""></div>
 
   <script type="text/javascript"> 
     //need a camera, a scene, and a renderer 
@@ -36,22 +35,112 @@
 
     var videoInput = document.getElementById('inputVideo');
     var canvasInput = document.getElementById('inputCanvas');
-    var debugOverlay = document.getElementById('debug');
-    //var htracker = new headtrackr.Tracker(debug: debugOverlay);
-    var htracker = new headtrackr.Tracker({calcAngles : true, ui : false, headPosition : false, debug : debugOverlay});
+
+    var htracker = new headtrackr.Tracker({calcAngles : true });
     htracker.init(videoInput, canvasInput);
     htracker.start();
 
-    htracker.addEventListener("found", function (event) {
-        coloredCube.rotationZ(event.angle)
-            .positionX(event.x).positionY(event.y)
-            .scaleX(event.width).scaleY(event.height);
-    });
+    // htracker.addEventListener("found", function (event) {
+    //     coloredCube.rotationZ(event.angle)
+    //         .positionX(event.x).positionY(event.y)
+    //         .scaleX(event.width).scaleY(event.height);
+    // });
     function render() {
         requestAnimationFrame(render);
         renderer.render(scene, camera);
     }
     render();
   </script> 
+  <script type="text/javascript">
+
+    //Global variables that will be accessed in the functions below.
+var currentKey;           //records the current key pressed
+var TimerWalk;            //timer handle
+var charStep = 2;         //1=1st foot, 2=stand, 3=2nd foot, 4=stand
+var charSpeed = 400;      //how fast the character will move
+
+//KeyDown Function
+//if there is no currentKey down, execute charWalk
+$(document).keydown(function(e) {
+  if (!currentKey) {
+    //set the currentKey to the key that is down 
+    currentKey = e.keyCode; 
+    //execute character movement function charWalk('direction') 
+    switch(e.keyCode) {
+      case 38: charWalk('up');    break; 
+      case 39: charWalk('right'); break; 
+      case 40: charWalk('down');  break; 
+      case 37: charWalk('left');  break; 
+    } 
+  } 
+});
+
+//KeyUp Function
+$(document).keyup(function(e) {
+  //don't stop the walk if the player is pushing other buttons 
+  //only stop the walk if the key that started the walk is released 
+  if (e.keyCode == currentKey) {
+    //set the currentKey to false, this will enable a new key to be pressed 
+    currentKey = false; 
+    //clear the walk timer 
+    clearInterval(TimerWalk); 
+    //finish the character's movement 
+    $('#character').stop(true, true); 
+  }
+});
+
+//Character Walk Function 
+function charWalk(dir) {
+  //adjust from lang to code 
+  if (dir == 'up') dir = 'back'; 
+  if (dir == 'down') dir = 'front'; 
+  //move the character 
+  processWalk(dir); 
+  //set the interval timer to continually move the character 
+  TimerWalk = setInterval(function() { processWalk(dir); }, charSpeed); 
+}
+
+//Process Character Walk Function
+function processWalk(dir) {
+  //increment the charStep as we will want to use the next stance in the animation 
+  //if the character is at the end of the animation, go back to the beginning 
+  charStep++; 
+  if (charStep == 5) charStep = 1;
+  
+  //remove the current class 
+  $('#character').removeAttr('class'); 
+
+  //add the new class 
+  switch(charStep) {
+    case 1: $('#character').addClass(dir+'-stand'); break; 
+    case 2: $('#character').addClass(dir+'-right'); break; 
+    case 3: $('#character').addClass(dir+'-stand'); break; 
+    case 4: $('#character').addClass(dir+'-left');  break; 
+  } 
+
+  //move the char 
+  //we will only want to move the character 32px (which is 1 unit) in any direction 
+  switch(dir) {
+    case'front': 
+      $('#character').animate({top: '+=32'}, charSpeed); 
+      break; 
+    case'back': 
+      //don't let the character move any further up if they are already at the top of the screen 
+      if ($('#character').position().top > 0) {
+        $('#character').animate({top: '-=32'}, charSpeed); 
+      } 
+      break; 
+    case'left': 
+      //don't let the character move any further left if they are already at the left side of the screen 
+      if ($('#character').position().left > 0) {
+        $('#character').animate({left: '-=32'}, charSpeed); 
+      } 
+      break; 
+    case'right': 
+      $('#character').animate({left: '+=32'}, charSpeed); 
+      break; 
+  }
+}
+  </script>
 </body> 
 </html>
