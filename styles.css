@@ -1,3 +1,6 @@
+body{
+	overflow: hidden; 
+}
 #character {
 	  position: absolute;
 	  top: 0px;
@@ -21,3 +24,15 @@
 #character.back-right { background-position: 0px -96px; } 
 #character.back-stand { background-position: -32px -96px; } 
 #character.back-left { background-position: -64px -96px; }
+
+.path-pebbles{
+	position: absolute;
+	border-radius: 50%;
+	border:1px solid #333; 
+	width: 32px; 
+	height: 32px; 
+	z-index:-1;
+}
+canvas{
+	z-index: 3;
+}
